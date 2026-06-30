@@ -8,6 +8,9 @@ export interface KeyEntry {
   models: string[];
   cluster: string;
   anthropicOk: boolean | null;
+  chatOk: boolean | null;
+  chatModel: string;
+  chatResponse: string;
 }
 
 export interface VerifyResult {
@@ -19,6 +22,10 @@ export interface VerifyResult {
   cluster: string;
   base: string;
   reason: string;
+  chatOk: boolean;
+  chatElapsed: number;
+  chatModel: string;
+  chatResponse: string;
 }
 
 export type VerifyStatus = "idle" | "loading" | "success" | "error";

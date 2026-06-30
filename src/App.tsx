@@ -97,9 +97,20 @@ export default function App() {
       models: result.models,
       cluster: result.cluster,
       anthropicOk: null,
+      chatOk: result.chatOk,
+      chatModel: result.chatModel,
+      chatResponse: result.chatResponse,
     };
     setKeys((prev) => [newKey, ...prev]);
-    showToast("success", `Key 已添加 — ${result.keyType === "tokenplan" ? "Token Plan" : "按量付费"}${result.cluster ? " · " + result.cluster : ""}`);
+    const chatInfo = result.chatOk
+      ? ` · 对话测试 ✅ ${result.chatElapsed.toFixed(1)}s`
+      : result.chatResponse
+        ? ` · 对话测试 ❌`
+        : "";
+    showToast(
+      "success",
+      `Key 已添加 — ${result.keyType === "tokenplan" ? "Token Plan" : "按量付费"}${result.cluster ? " · " + result.cluster : ""}${chatInfo}`
+    );
   }, []);
 
   // ── Delete ──

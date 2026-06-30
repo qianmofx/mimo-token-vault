@@ -64,6 +64,12 @@ export function KeyItem({ entry, isChecking, onDelete }: Props) {
       {entry.anthropicOk === true && (
         <span className="key-meta anthro" title="Anthropic 协议可用">A✓</span>
       )}
+      {entry.chatOk === true && (
+        <span className="key-meta chat-ok" title={entry.chatResponse || "对话测试通过"}>💬</span>
+      )}
+      {entry.chatOk === false && (
+        <span className="key-meta chat-fail" title="对话测试失败">⚠️</span>
+      )}
 
       <div className="key-actions">
         <button

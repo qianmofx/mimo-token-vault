@@ -33,7 +33,13 @@ export function KeyInput({ onAdd, onVerify, detectType, onTestAnthropic, onUpdat
       setLastResult(result);
       if (result.ok) {
         setStatus("success");
-        setMessage(`✅ 有效 · ${result.status} · ${result.elapsed.toFixed(1)}s${result.cluster ? " · " + result.cluster : ""}${result.models.length > 0 ? " · " + result.models.length + " 个模型" : ""}`);
+        let chatInfo = "";
+        if (result.chatOk) {
+          chatInfo = ` · 💬 ${result.chatElapsed.toFixed(1)}s → ${result.chatResponse.slice(0, 60)}${result.chatResponse.length > 60 ? "…" : ""}`;
+        } else if (result.chatModel) {
+          chatInfo = " · ⚠️ 对话测试失败";
+        }
+        setMessage(`✅ 有效 · ${result.status} · ${result.elapsed.toFixed(1)}s${result.cluster ? " · " + result.cluster : ""}${result.models.length > 0 ? " · " + result.models.length + " 个模型" : ""}${chatInfo}`);
         onAdd(trimmed, result);
         setValue("");
         setLastResult(null);

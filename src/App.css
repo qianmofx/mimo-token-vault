@@ -623,6 +623,16 @@ body {
   font-weight: 700;
 }
 
+.key-meta.chat-ok {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.key-meta.chat-fail {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
 /* ── Model Preview ── */
 .model-preview::-webkit-scrollbar {
   width: 4px;
