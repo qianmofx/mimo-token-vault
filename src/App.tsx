@@ -87,6 +87,11 @@ export default function App() {
 
   // ── Add key after successful verification ──
   const addKey = useCallback((rawKey: string, result: VerifyResult) => {
+    // 对话测试失败则拒绝导入
+    if (!result.chatOk) {
+      showToast("error", "对话测试失败，Key 未导入");
+      return false;
+    }
     const newKey: KeyEntry = {
       id: generateId(),
       key: rawKey.trim(),
@@ -102,15 +107,11 @@ export default function App() {
       chatResponse: result.chatResponse,
     };
     setKeys((prev) => [newKey, ...prev]);
-    const chatInfo = result.chatOk
-      ? ` · 对话测试 ✅ ${result.chatElapsed.toFixed(1)}s`
-      : result.chatResponse
-        ? ` · 对话测试 ❌`
-        : "";
     showToast(
       "success",
-      `Key 已添加 — ${result.keyType === "tokenplan" ? "Token Plan" : "按量付费"}${result.cluster ? " · " + result.cluster : ""}${chatInfo}`
+      `Key 已添加 — ${result.keyType === "tokenplan" ? "Token Plan" : "按量付费"}${result.cluster ? " · " + result.cluster : ""} · 对话测试 ✅ ${result.chatElapsed.toFixed(1)}s`
     );
+    return true;
   }, []);
 
   // ── Delete ──
@@ -141,6 +142,9 @@ export default function App() {
           isValid: result.ok,
           models: result.models,
           cluster: result.cluster,
+          chatOk: result.chatOk,
+          chatModel: result.chatModel,
+          chatResponse: result.chatResponse,
           lastChecked: new Date().toISOString(),
         };
       } catch {
@@ -166,13 +170,13 @@ export default function App() {
 
   // ── Batch delete invalid ──
   const batchDeleteInvalid = useCallback(() => {
-    const invalid = keys.filter((k) => k.isValid === false);
+    const invalid = keys.filter((k) => k.isValid === false || k.chatOk === false);
     if (invalid.length === 0) {
       showToast("info", "没有失效的 Key");
       return;
     }
     setKeys((prev) => {
-      const updated = prev.filter((k) => k.isValid !== false);
+      const updated = prev.filter((k) => k.isValid !== false && k.chatOk !== false);
       if (updated.length === 0) {
         invoke("clear_keys").catch(console.error);
       }
@@ -194,8 +198,8 @@ export default function App() {
     );
   }, []);
 
-  const validCount = keys.filter((k) => k.isValid === true).length;
-  const invalidCount = keys.filter((k) => k.isValid === false).length;
+  const validCount = keys.filter((k) => k.isValid === true && k.chatOk !== false).length;
+  const invalidCount = keys.filter((k) => k.isValid === false || k.chatOk === false).length;
   const unknownCount = keys.filter((k) => k.isValid === null).length;
 
   return (
@@ -235,7 +239,7 @@ export default function App() {
           onBatchCheck={batchCheck}
           onBatchDeleteInvalid={batchDeleteInvalid}
           batchRunning={batchRunning}
-          hasInvalidKeys={invalidCount > 0}
+          hasInvalidKeys={invalidCount > 0 || keys.some((k) => k.chatOk === false)}
         />
       )}
 

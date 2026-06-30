@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import type { VerifyResult, VerifyStatus } from "../types";
 
 interface Props {
-  onAdd: (key: string, result: VerifyResult) => void;
+  onAdd: (key: string, result: VerifyResult) => boolean;
   onVerify: (key: string) => Promise<VerifyResult>;
   detectType: (key: string) => "payg" | "tokenplan" | "unknown";
   onTestAnthropic: (key: string) => Promise<VerifyResult>;
@@ -33,12 +33,15 @@ export function KeyInput({ onAdd, onVerify, detectType, onTestAnthropic, onUpdat
       setLastResult(result);
       if (result.ok) {
         setStatus("success");
-        let chatInfo = "";
-        if (result.chatOk) {
-          chatInfo = ` · 💬 ${result.chatElapsed.toFixed(1)}s → ${result.chatResponse.slice(0, 60)}${result.chatResponse.length > 60 ? "…" : ""}`;
-        } else if (result.chatModel) {
-          chatInfo = " · ⚠️ 对话测试失败";
+        const added = onAdd(trimmed, result);
+        if (!added) {
+          // Chat test failed, addKey returned false
+          setStatus("error");
+          setMessage("❌ 对话测试失败，Key 未导入（模型接口正常但无法对话）");
+          setLastResult(result);
+          return;
         }
+        let chatInfo = ` · 💬 ${result.chatElapsed.toFixed(1)}s → ${result.chatResponse.slice(0, 60)}${result.chatResponse.length > 60 ? "…" : ""}`;
         setMessage(`✅ 有效 · ${result.status} · ${result.elapsed.toFixed(1)}s${result.cluster ? " · " + result.cluster : ""}${result.models.length > 0 ? " · " + result.models.length + " 个模型" : ""}${chatInfo}`);
         onAdd(trimmed, result);
         setValue("");
